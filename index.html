@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBH Hub — Task Bar Hero</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .hub-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px}
+  .hub-card{
+    position:relative;display:flex;flex-direction:column;gap:10px;text-decoration:none;
+    border-radius:20px;overflow:hidden;border:1px solid var(--line);
+    background:linear-gradient(180deg, #16264a, #0c1530);
+    box-shadow:var(--shadow);padding:22px;color:var(--text);
+    transition:transform .12s ease, box-shadow .2s, border-color .2s;
+  }
+  .hub-card:hover{transform:translateY(-3px);border-color:var(--rare);box-shadow:var(--shadow), 0 0 30px rgba(47,139,255,.25)}
+  .hub-card .ico{width:50px;height:50px;border-radius:13px;display:grid;place-items:center;
+    background:radial-gradient(circle at 50% 30%, #1d2c52, #0a1126);border:1px solid #2c456f}
+  .hub-card .ico svg{width:28px;height:28px}
+  .hub-card .num{position:absolute;top:18px;right:20px;font-family:'Chakra Petch';font-weight:700;font-size:13px;color:var(--muted2)}
+  .hub-card h3{margin:6px 0 0;font-weight:700;font-size:clamp(18px,2.6vw,21px)}
+  .hub-card p{margin:0;color:var(--muted);font-size:14.5px;font-weight:600;line-height:1.5}
+  .hub-card .go{margin-top:auto;padding-top:10px;font-family:'Chakra Petch';font-weight:700;font-size:13px;color:var(--rare-soft);letter-spacing:.04em;text-transform:uppercase}
+  @media (max-width:720px){.hub-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="topbar-slot" data-home="1"></div>
+
+  <section class="lead">
+    <div class="eyebrow">Hub do Farmer</div>
+    <h1>Maximize seu <span class="blue">farm</span> no Task Bar Hero</h1>
+    <p>Quatro ferramentas pra te ajudar a farmar melhor, gastar com inteligência na Steam (se quiser) e otimizar seu tempo de fase. Escolha uma aba abaixo.</p>
+  </section>
+
+  <section class="hub-grid">
+    <a class="hub-card" href="loot.html">
+      <span class="num">01</span>
+      <div class="ico">
+        <svg viewBox="0 0 32 32" shape-rendering="crispEdges" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+          <rect x="5" y="6" width="22" height="7" fill="#3f7fd6"/><rect x="5" y="6" width="22" height="2" fill="#6fa8ef"/>
+          <rect x="5" y="13" width="22" height="2" fill="#1c3f76"/><rect x="4" y="15" width="24" height="11" fill="#2f63b4"/>
+          <rect x="4" y="15" width="24" height="2" fill="#4f86d6"/><rect x="4" y="24" width="24" height="2" fill="#163763"/>
+          <rect x="14" y="11" width="4" height="9" fill="#ffd76a"/><rect x="14" y="11" width="4" height="2" fill="#fff0bf"/>
+        </svg>
+      </div>
+      <h3>Calculadora de Loot</h3>
+      <p>Chance final de baú boss (Lv65/Lv80) e baú comum, baús/hora e melhor tempo de fase.</p>
+      <span class="go">Abrir →</span>
+    </a>
+
+    <a class="hub-card" href="materiais.html">
+      <span class="num">02</span>
+      <div class="ico">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M4 7l8-4 8 4-8 4-8-4z" stroke="var(--fire2)" stroke-width="1.8" stroke-linejoin="round"/><path d="M4 7v10l8 4 8-4V7" stroke="var(--fire2)" stroke-width="1.8" stroke-linejoin="round"/><path d="M12 11v10" stroke="var(--fire2)" stroke-width="1.8"/></svg>
+      </div>
+      <h3>Materiais de Farm</h3>
+      <p>Filtra os 125 materiais por equipamento, finalidade e atributo pra saber o que guardar ou sintetizar.</p>
+      <span class="go">Abrir →</span>
+    </a>
+
+    <a class="hub-card" href="mercado.html">
+      <span class="num">03</span>
+      <div class="ico">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="9" cy="20" r="1.6" fill="var(--rare-soft)"/><circle cx="17" cy="20" r="1.6" fill="var(--rare-soft)"/><path d="M2 3h2l2.2 12.2a2 2 0 0 0 2 1.8h8.6a2 2 0 0 0 2-1.6L21 7H6" stroke="var(--rare-soft)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3>Mercado</h3>
+      <p>Sobe seu save, vê o valor do baú no Mercado Steam e os 4 melhores itens pra vender.</p>
+      <span class="go">Abrir →</span>
+    </a>
+
+    <a class="hub-card" href="otimizar.html">
+      <span class="num">04</span>
+      <div class="ico">
+        <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="var(--green)" stroke-width="1.8"/><path d="M12 7v5l3.5 2" stroke="var(--green)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+      </div>
+      <h3>Otimizar Tempo</h3>
+      <p>Compara seu dano/velocidade com Exploradora e Feiticeiro e mostra o que melhorar pra baixar o tempo.</p>
+      <span class="go">Abrir →</span>
+    </a>
+  </section>
+
+  <footer class="foot">
+    <span class="formula">TBH Hub · ferramentas feitas pela comunidade pra comunidade</span>
+  </footer>
+
+</div>
+<script src="js/topbar.js"></script>
+</body>
+</html>

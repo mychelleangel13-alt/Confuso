@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBH • Materiais de Farm</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .filters-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  @media (max-width:780px){.filters-grid{grid-template-columns:1fr}}
+  .mat-card{display:flex;gap:14px;align-items:center;border:1px solid var(--line);border-radius:14px;padding:12px 14px;background:#0c1426}
+  .mat-card .ico{width:44px;height:44px;border-radius:10px;flex:0 0 auto;display:grid;place-items:center;
+    background:radial-gradient(circle at 50% 30%,#16335f,#081026);border:1px solid #2c5896}
+  .mat-card .ico svg{width:26px;height:26px}
+  .mat-card .info{min-width:0;flex:1 1 auto}
+  .mat-card .name{font-family:'Chakra Petch';font-weight:700;font-size:14.5px}
+  .mat-card .tags{margin-top:3px;display:flex;flex-wrap:wrap;gap:5px}
+  .tagpill{font-size:11px;font-weight:700;color:var(--muted2);background:rgba(255,255,255,.04);border:1px solid var(--line);border-radius:999px;padding:2px 8px}
+  .mat-card .price{text-align:right;flex:0 0 auto}
+  .mat-card .price .v{font-family:'Chakra Petch';font-weight:700;color:var(--green);font-size:15px}
+  .mat-card .price .lab{font-size:10.5px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em}
+  .result-list{display:flex;flex-direction:column;gap:8px;margin-top:14px}
+  .counts{display:flex;gap:14px;flex-wrap:wrap;margin-top:6px}
+  .count-pill{font-family:'Chakra Petch';font-weight:700;font-size:13px;color:var(--text);
+    border:1px solid var(--line);border-radius:999px;padding:6px 12px;background:rgba(47,139,255,.08)}
+  .count-pill b{color:var(--rare-soft)}
+  .count-pill.sell b{color:var(--green)}
+  .count-pill.keep b{color:var(--fire2)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="topbar-slot" data-badge="02 · Materiais de Farm"></div>
+
+  <section class="lead">
+    <div class="eyebrow">Materiais de Farm</div>
+    <h1>O que <span class="blue">guardar</span> e o que <span style="color:var(--fire2)">sintetizar</span></h1>
+    <p>Filtre pelo equipamento, finalidade (decoração, inscrição, gravação) e atributos que você busca. Marque se quer considerar venda — itens de R$ 0,25 ou mais no Mercado Steam entram na lista de "vender".</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><span class="label">🔍 Filtros</span><span class="hint">combine quantos quiser</span></div>
+
+    <div class="filters-grid">
+      <div class="field">
+        <label>1 · Tipo de equipamento</label>
+        <select id="fEquip">
+          <option value="">Todos</option>
+          <option>Espada</option>
+          <option>Cajado</option>
+          <option>Arco</option>
+          <option>Armadura</option>
+          <option>Anel</option>
+          <option>Luvas</option>
+          <option>Bota</option>
+          <option>Orb</option>
+        </select>
+      </div>
+
+      <div class="field">
+        <label>3 · Atributos</label>
+        <select id="fAttr">
+          <option value="">Todos</option>
+          <option>Dano Físico</option>
+          <option>Dano por Projétil</option>
+          <option>Dano em Área</option>
+          <option>Dano de Raio</option>
+          <option>Velocidade de Movimento</option>
+          <option>Redução de Recarga</option>
+          <option>Velocidade de Lançamento</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>2 · Finalidade (selecione um ou mais)</label>
+      <div class="check-row" id="fPurpose">
+        <label class="check-pill"><input type="checkbox" value="decoracao"> Decoração</label>
+        <label class="check-pill"><input type="checkbox" value="inscricao"> Inscrição</label>
+        <label class="check-pill"><input type="checkbox" value="gravacao"> Gravação</label>
+      </div>
+    </div>
+
+    <div class="field" style="margin-top:14px">
+      <label>4 · Venda</label>
+      <div class="check-row">
+        <label class="check-pill" id="sellWrap"><input type="checkbox" id="fSell"> Considerar apenas itens vendáveis (≥ R$ 0,25 no mercado)</label>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>📦 Resultado</h2>
+    <p class="desc" id="resultDesc">Itens que combinam com o que você selecionou. O que <b>não</b> aparecer aqui pode ser sintetizado.</p>
+    <div class="counts">
+      <span class="count-pill keep">Guardar: <b id="cntKeep">0</b></span>
+      <span class="count-pill sell">Vender: <b id="cntSell">0</b></span>
+      <span class="count-pill">Sintetizar (resto): <b id="cntSynth">0</b></span>
+    </div>
+    <div class="result-list" id="resultList"></div>
+    <div class="notice warn">
+      Os preços de venda mostrados aqui são <b>de exemplo</b>. Para atualizá-los de verdade com o Mercado Steam ao vivo, veja a aba <a href="mercado.html" style="color:var(--rare-soft)">Mercado</a> — esse cálculo precisa de um proxy de servidor (explico no fim da página).
+    </div>
+  </section>
+
+  <footer class="foot">
+    <span class="formula">Fonte de conhecimento: <code>taskbarhero.wiki/pt</code> (precisa ser preenchida manualmente — veja instruções)</span>
+    <a class="home-btn" href="index.html">← Voltar pras abas</a>
+  </footer>
+
+</div>
+<script src="js/topbar.js"></script>
+<script>
+  // =====================================================================
+  // BASE DE DADOS DOS MATERIAIS — SUBSTITUA pelos 125 materiais reais.
+  // Cada item: { id, name, equip:[...], purpose:[...], attrs:[...], price (R$) }
+  // 'equip' é a lista de tipos de equipamento em que o material serve.
+  // 'purpose' pode conter: 'decoracao', 'inscricao', 'gravacao'.
+  // 'price' = preço de venda imediata na Steam, em reais (0 = sem mercado/abaixo de R$0,25).
+  // =====================================================================
+  const MATERIALS = [
+    { id:'m001', name:'Núcleo de Granito',      equip:['Espada','Armadura'], purpose:['gravacao'],            attrs:['Dano Físico'],               price:0.42 },
+    { id:'m002', name:'Pó de Quartzo Veloz',     equip:['Bota','Orb'],        purpose:['inscricao'],           attrs:['Velocidade de Movimento'],   price:0.10 },
+    { id:'m003', name:'Cristal de Eco',          equip:['Cajado','Orb'],      purpose:['decoracao','inscricao'], attrs:['Redução de Recarga'],      price:0.61 },
+    { id:'m004', name:'Pena Cinética',           equip:['Arco','Luvas'],      purpose:['gravacao'],            attrs:['Dano por Projétil'],         price:0.05 },
+    { id:'m005', name:'Fragmento de Tempestade', equip:['Cajado'],            purpose:['decoracao'],           attrs:['Dano de Raio'],              price:0.88 },
+    { id:'m006', name:'Esfera de Onda',          equip:['Anel','Cajado'],     purpose:['inscricao'],           attrs:['Dano em Área'],              price:0.0  },
+    { id:'m007', name:'Placa Reforçada',         equip:['Armadura'],          purpose:['gravacao'],            attrs:['Dano Físico'],               price:0.27 },
+    { id:'m008', name:'Selo Veloz',              equip:['Bota'],              purpose:['inscricao','decoracao'], attrs:['Velocidade de Movimento'], price:0.33 },
+    // ↑ adicione os outros ~117 materiais aqui no mesmo formato.
+  ];
+
+  const equipSel=document.getElementById('fEquip'), attrSel=document.getElementById('fAttr');
+  const purposeBoxes=[...document.querySelectorAll('#fPurpose input')];
+  const sellBox=document.getElementById('fSell');
+  const listEl=document.getElementById('resultList');
+
+  const money=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+
+  const matSVG=`<svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 2l8 4.5v9L12 20l-8-4.5v-9L12 2z" stroke="#5aa6ff" stroke-width="1.6" stroke-linejoin="round"/><path d="M12 11l8-4.5M12 11v9M12 11L4 6.5" stroke="#5aa6ff" stroke-width="1.6" stroke-linejoin="round"/></svg>`;
+
+  function render(){
+    const equip=equipSel.value, attr=attrSel.value;
+    const purposes=purposeBoxes.filter(b=>b.checked).map(b=>b.value);
+    const sellOnly=sellBox.checked;
+
+    purposeBoxes.forEach(b=>b.closest('.check-pill').classList.toggle('on',b.checked));
+    sellBox.closest('.check-pill').classList.toggle('on',sellOnly);
+
+    const matches = MATERIALS.filter(m=>{
+      if(equip && !m.equip.includes(equip)) return false;
+      if(attr && !m.attrs.includes(attr)) return false;
+      if(purposes.length && !purposes.some(p=>m.purpose.includes(p))) return false;
+      if(sellOnly && m.price < 0.25) return false;
+      return true;
+    });
+
+    const keep = matches.filter(m=>m.price < 0.25 || !sellOnly);
+    const sell = MATERIALS.filter(m=>m.price >= 0.25);
+    const synth = MATERIALS.filter(m=>!matches.includes(m));
+
+    document.getElementById('cntKeep').textContent = matches.length;
+    document.getElementById('cntSell').textContent = sell.length;
+    document.getElementById('cntSynth').textContent = synth.length;
+
+    listEl.innerHTML = matches.length ? matches.map(m=>`
+      <div class="mat-card">
+        <div class="ico">${matSVG}</div>
+        <div class="info">
+          <div class="name">${m.name}</div>
+          <div class="tags">
+            ${m.equip.map(e=>`<span class="tagpill">${e}</span>`).join('')}
+            ${m.attrs.map(a=>`<span class="tagpill">${a}</span>`).join('')}
+          </div>
+        </div>
+        <div class="price">
+          <div class="v">${m.price>0?money(m.price):'—'}</div>
+          <div class="lab">${m.price>=0.25?'vendável':'guardar'}</div>
+        </div>
+      </div>
+    `).join('') : `<div class="notice info">Nenhum material bate com esse filtro — pode sintetizar tudo que não aparece.</div>`;
+  }
+
+  [equipSel,attrSel,sellBox].forEach(el=>el.addEventListener('change',render));
+  purposeBoxes.forEach(b=>b.addEventListener('change',render));
+  render();
+</script>
+</body>
+</html>

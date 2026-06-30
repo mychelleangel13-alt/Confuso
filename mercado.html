@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBH • Mercado</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .top4{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-top:14px}
+  @media (max-width:900px){.top4{grid-template-columns:1fr 1fr}}
+  @media (max-width:560px){.top4{grid-template-columns:1fr}}
+  .t4-card{border:1px solid rgba(95,208,106,.35);border-radius:14px;padding:14px;background:#0c1426;text-align:center}
+  .t4-card .rank{font-family:'Chakra Petch';font-weight:700;font-size:11px;color:var(--green);letter-spacing:.1em}
+  .t4-card .nm{font-family:'Chakra Petch';font-weight:700;font-size:14.5px;margin:6px 0 2px}
+  .t4-card .pr{font-family:'Chakra Petch';font-weight:700;color:#fff;font-size:19px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="topbar-slot" data-badge="03 · Mercado"></div>
+
+  <section class="lead">
+    <div class="eyebrow">Mercado Steam</div>
+    <h1>Quanto vale o seu <span class="blue">baú</span>?</h1>
+    <p>Suba seu <code style="color:var(--rare-soft)">SaveFile_Live.es3</code> e veja o valor do inventário no Mercado da Comunidade Steam, com os 4 melhores itens pra vender. O save é lido só no seu navegador — nada é enviado a nenhum servidor.</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><span class="label">📂 Seu save</span><span class="hint">leitura 100% local</span></div>
+    <div class="dropzone" id="dropzone">
+      <b>Arraste o SaveFile_Live.es3 aqui</b><br>
+      <span style="color:var(--muted);font-size:13.5px">ou clique pra escolher · fica em <code style="color:var(--rare-soft)">%AppData%\LocalLow\TesseractStudio\TaskbarHero\</code></span>
+      <input type="file" id="fileInput" accept=".es3" style="display:none">
+    </div>
+    <div class="notice info" id="status">Nenhum save carregado ainda.</div>
+  </section>
+
+  <section class="section-card">
+    <h2>💰 Valor do baú</h2>
+    <p class="desc">Preço por item × quantidade, somado. Atualizado com o Mercado Steam (appid 3678970).</p>
+    <table class="tbl" id="invTable" style="display:none">
+      <thead><tr><th></th><th>Item</th><th>Qtd</th><th>Preço un.</th><th>Subtotal</th></tr></thead>
+      <tbody id="invBody"></tbody>
+    </table>
+    <div class="notice warn" id="emptyNotice">Carregue um save acima pra ver os valores aqui.</div>
+  </section>
+
+  <section class="section-card">
+    <h2>🏆 4 melhores itens pra vender agora</h2>
+    <p class="desc">Maior subtotal (preço × quantidade) do seu inventário.</p>
+    <div class="top4" id="top4"></div>
+  </section>
+
+  <section class="section-card">
+    <h2>⚙️ Como isso funciona por trás dos panos</h2>
+    <p class="desc">
+      A leitura do save (decriptação Easy Save 3 + parse do inventário) roda inteiramente no seu navegador, em JavaScript — por isso nada é enviado pra fora.
+      Já a consulta de preço (<code style="color:var(--rare-soft)">steamcommunity.com/market/priceoverview</code>) <b>não libera CORS</b> pra chamadas diretas do navegador, então essa página chama um pequeno proxy de servidor que só repassa a pergunta pra Steam e devolve a resposta com o header liberado.
+      Veja o arquivo <code style="color:var(--rare-soft)">proxy/steam-price-proxy.js</code> entregue junto com o site — é o código pronto desse proxy, pra você publicar de graça num Cloudflare Worker.
+    </p>
+    <div class="notice info">Configure a URL do seu proxy publicado na constante <code>PROXY_URL</code> no topo do script desta página.</div>
+  </section>
+
+  <footer class="foot">
+    <span class="formula">Leitura local · preços via proxy · nada do save é enviado</span>
+    <a class="home-btn" href="index.html">← Voltar pras abas</a>
+  </footer>
+
+</div>
+<script src="js/topbar.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.2.0/crypto-js.min.js"></script>
+<script>
+  // =====================================================================
+  // CONFIGURAÇÃO — preencha depois de publicar o proxy (ver proxy/steam-price-proxy.js)
+  // =====================================================================
+  const PROXY_URL = ''; // ex: 'https://seu-worker.workers.dev'
+  const APPID = 3678970;
+
+  // Senha do ES3 do jogo (Easy Save 3). Procure "ES3Defaults" perto de
+  // "SaveFile_Live.es3" nos assets do jogo pra achar essa chave em texto legível.
+  // Preencha aqui depois de encontrar a chave real:
+  const ES3_PASSWORD = ''; // <-- preencher manualmente
+
+  // Tabela de referência: nome interno do save → market_hash_name da Steam.
+  // Preencha conforme for descobrindo os hashes corretos no mercado.
+  const ITEM_NAME_MAP = {
+    // 'NomeInternoNoSave': 'Nome Exato no Mercado Steam',
+  };
+
+  const dropzone=document.getElementById('dropzone');
+  const fileInput=document.getElementById('fileInput');
+  const statusEl=document.getElementById('status');
+  const invTable=document.getElementById('invTable');
+  const invBody=document.getElementById('invBody');
+  const emptyNotice=document.getElementById('emptyNotice');
+  const top4El=document.getElementById('top4');
+
+  dropzone.addEventListener('click',()=>fileInput.click());
+  dropzone.addEventListener('dragover',e=>{e.preventDefault();dropzone.classList.add('over')});
+  dropzone.addEventListener('dragleave',()=>dropzone.classList.remove('over'));
+  dropzone.addEventListener('drop',e=>{
+    e.preventDefault();dropzone.classList.remove('over');
+    if(e.dataTransfer.files[0]) handleFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change',e=>{ if(e.target.files[0]) handleFile(e.target.files[0]); });
+
+  function handleFile(file){
+    if(!ES3_PASSWORD){
+      statusEl.className='notice warn';
+      statusEl.textContent='ES3_PASSWORD ainda não foi preenchida no código — veja "Como isso funciona" abaixo pra saber onde encontrar essa chave.';
+      return;
+    }
+    statusEl.className='notice info';
+    statusEl.textContent='Lendo '+file.name+'...';
+    const reader=new FileReader();
+    reader.onload=()=>{
+      try{
+        const raw = reader.result; // texto criptografado do ES3
+        const items = decryptES3Inventory(raw, ES3_PASSWORD);
+        statusEl.className='notice ok';
+        statusEl.textContent = items.length + ' itens lidos do baú.';
+        lookupPrices(items);
+      }catch(err){
+        statusEl.className='notice warn';
+        statusEl.textContent='Não consegui ler o save: '+err.message+'. Confira a senha ES3 e o formato do arquivo.';
+      }
+    };
+    reader.readAsText(file);
+  }
+
+  // Decripta um arquivo Easy Save 3 (AES) e extrai a lista de itens do baú.
+  // O formato exato de "baú" dentro do JSON do ES3 varia por versão do jogo —
+  // ajuste a função extractItems() abaixo depois de inspecionar o JSON decriptado uma vez.
+  function decryptES3Inventory(rawText, password){
+    const decrypted = CryptoJS.AES.decrypt(rawText, password).toString(CryptoJS.enc.Utf8);
+    const data = JSON.parse(decrypted);
+    return extractItems(data);
+  }
+
+  function extractItems(data){
+    // TODO: ajustar o caminho conforme a estrutura real do save do TBH.
+    // Exemplo provável: data.chestItems ou data["baú"] sendo um array de { name, qty }.
+    const raw = data.chestItems || data.inventory || [];
+    return raw.map(it=>({ name: it.name || it.Name, qty: it.qty || it.Qty || it.amount || 1 }));
+  }
+
+  async function lookupPrices(items){
+    if(!PROXY_URL){
+      statusEl.className='notice warn';
+      statusEl.textContent+=' (PROXY_URL não configurada — preços não puderam ser buscados.)';
+      return;
+    }
+    const rows=[];
+    for(const it of items){
+      const marketName = ITEM_NAME_MAP[it.name] || it.name;
+      let price=0;
+      try{
+        const res = await fetch(`${PROXY_URL}/price?appid=${APPID}&market_hash_name=${encodeURIComponent(marketName)}`);
+        const json = await res.json();
+        price = json.lowest_price_brl || 0;
+      }catch(e){ /* item sem mercado ou proxy indisponível */ }
+      rows.push({ name: it.name, qty: it.qty, price, subtotal: price*it.qty });
+    }
+    renderInventory(rows);
+  }
+
+  function renderInventory(rows){
+    rows.sort((a,b)=>b.subtotal-a.subtotal);
+    if(!rows.length){ emptyNotice.style.display='block'; invTable.style.display='none'; return; }
+    emptyNotice.style.display='none'; invTable.style.display='table';
+    const money=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    invBody.innerHTML = rows.map(r=>`<tr><td></td><td>${r.name}</td><td>${r.qty}</td><td>${money(r.price)}</td><td>${money(r.subtotal)}</td></tr>`).join('');
+    const total = rows.reduce((s,r)=>s+r.subtotal,0);
+    invBody.innerHTML += `<tr><td colspan="4" style="text-align:right;color:var(--muted2)">Total</td><td style="color:var(--green)">${money(total)}</td></tr>`;
+
+    const top4 = rows.slice(0,4);
+    top4El.innerHTML = top4.map((r,i)=>`
+      <div class="t4-card"><div class="rank">#${i+1}</div><div class="nm">${r.name}</div><div class="pr">${money(r.subtotal)}</div></div>
+    `).join('') || '<div class="notice info">Sem itens vendáveis encontrados.</div>';
+  }
+</script>
+</body>
+</html>

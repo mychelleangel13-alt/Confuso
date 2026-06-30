@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>TBH • Otimizar Tempo</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@500;600;700&family=Rajdhani:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="css/base.css">
+<style>
+  .char-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:18px}
+  @media (max-width:780px){.char-grid{grid-template-columns:1fr}}
+  .char-card{border:1px solid var(--line);border-radius:18px;padding:18px;background:#0c1426}
+  .char-card h3{margin:0 0 12px;font-weight:700;font-size:17px;display:flex;align-items:center;gap:8px}
+  .char-card .fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .slot-row{display:flex;gap:10px;margin-top:6px;flex-wrap:wrap}
+  .slot{flex:1 1 90px;text-align:center;border:1px solid var(--line);border-radius:12px;padding:10px;background:#0a1226}
+  .slot .lab{font-size:11px;color:var(--muted2);text-transform:uppercase;letter-spacing:.06em;font-weight:700;font-family:'Chakra Petch'}
+  .slot .pct{font-family:'Chakra Petch';font-weight:700;font-size:18px;color:var(--rare-soft);margin-top:4px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div id="topbar-slot" data-badge="04 · Otimizar Tempo"></div>
+
+  <section class="lead">
+    <div class="eyebrow">Otimizar Tempo</div>
+    <h1>Onde focar pra <span class="blue">baixar seu tempo</span> de fase</h1>
+    <p>Preencha seu tempo atual, o que você já tem e o dano/velocidade de cada personagem. O site calcula o dano por ataque necessário e te diz o que melhorar.</p>
+  </section>
+
+  <section class="panel">
+    <div class="panel-head"><span class="label">⏱️ Tempo atual</span><span class="hint">o que você está fazendo agora, por fase</span></div>
+    <div class="time-box">
+      <div class="seg"><label>Minutos</label><div class="seg-input"><input id="curMin" type="number" min="0" value="1"></div></div>
+      <span class="colon">:</span>
+      <div class="seg"><label>Segundos</label><div class="seg-input"><input id="curSec" type="number" min="0" max="59" value="30"></div></div>
+    </div>
+    <div class="field" style="margin-top:16px">
+      <label>Você está fazendo qual faixa de fases?</label>
+      <div class="check-row">
+        <label class="check-pill"><input type="radio" name="faixa" value="1-3" checked> Fases 1–3</label>
+        <label class="check-pill"><input type="radio" name="faixa" value="3-9"> Fases 3–9</label>
+      </div>
+    </div>
+    <div class="field" style="margin-top:14px">
+      <label>Equipamentos-chave</label>
+      <div class="check-row">
+        <label class="check-pill"><input type="checkbox" id="hasBota"> Tenho a melhor Bota nível 15</label>
+        <label class="check-pill"><input type="checkbox" id="hasOrb"> Tenho o Orb de Gelo nível 15</label>
+      </div>
+    </div>
+  </section>
+
+  <section class="char-grid">
+    <div class="char-card">
+      <h3>🏹 Exploradora</h3>
+      <div class="fields">
+        <div class="field"><label>Dano por Projétil</label><input type="number" id="expProj" value="0"></div>
+        <div class="field"><label>Dano Físico</label><input type="number" id="expFis" value="0"></div>
+        <div class="field"><label>Velocidade de Movimento</label><input type="number" id="expMove" value="0"></div>
+        <div class="field"><label>Dano por ataque atual</label><input type="number" id="expAtk" value="0"></div>
+      </div>
+    </div>
+    <div class="char-card">
+      <h3>🪄 Feiticeiro</h3>
+      <div class="fields">
+        <div class="field"><label>Dano em Área</label><input type="number" id="feiArea" value="0"></div>
+        <div class="field"><label>Dano de Raio</label><input type="number" id="feiRaio" value="0"></div>
+        <div class="field"><label>Velocidade de Movimento</label><input type="number" id="feiMove" value="0"></div>
+        <div class="field"><label>Redução de Recarga</label><input type="number" id="feiRecarga" value="0"></div>
+        <div class="field" style="grid-column:1/-1"><label>Dano por ataque atual</label><input type="number" id="feiAtk" value="0"></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="section-card">
+    <h2>🎯 Veredito</h2>
+    <p class="desc" id="verdictText">Preencha os campos acima pra ver o que melhorar.</p>
+    <div class="notice info" id="dpaNeeded"></div>
+  </section>
+
+  <section class="section-card">
+    <h2>💍 Acessórios</h2>
+    <p class="desc">Total de slots disponíveis: <b>1 inscrição</b>, <b>1 gravação</b> e <b>2 decorações</b>. Abaixo, as pedras recomendadas e a porcentagem-alvo em cada slot.</p>
+    <div class="slot-row">
+      <div class="slot"><div class="lab">Inscrição</div><div class="pct" id="slotInsc">—</div></div>
+      <div class="slot"><div class="lab">Gravação</div><div class="pct" id="slotGrav">—</div></div>
+      <div class="slot"><div class="lab">Decoração 1</div><div class="pct" id="slotDec1">—</div></div>
+      <div class="slot"><div class="lab">Decoração 2</div><div class="pct" id="slotDec2">—</div></div>
+    </div>
+    <div class="notice warn">Os alvos de % e as pedras recomendadas dependem da tabela do Google Doc que você mencionou — preencha a função <code>recommendSlots()</code> no script desta página com os valores reais.</div>
+  </section>
+
+  <section class="section-card">
+    <h2>🛒 Mercado — onde gastar</h2>
+    <p class="desc">Defina um teto de gastos e o site distribui automaticamente entre as melhores compras pros seus personagens.</p>
+    <div class="field" style="max-width:260px">
+      <label>Teto de gastos (R$)</label>
+      <input type="number" id="budgetCap" value="50" min="0">
+    </div>
+    <button class="btn primary" id="distributeBtn" style="margin-top:12px">Distribuir orçamento</button>
+    <table class="tbl" id="budgetTable" style="margin-top:16px;display:none">
+      <thead><tr><th>Item</th><th>Personagem</th><th>Atributo</th><th>Preço</th></tr></thead>
+      <tbody id="budgetBody"></tbody>
+    </table>
+    <div class="notice warn" style="margin-top:14px">A lista de itens-alvo do mercado e seus preços ao vivo precisam do mesmo proxy de Steam usado na aba <a href="mercado.html" style="color:var(--rare-soft)">Mercado</a> — veja <code>proxy/steam-price-proxy.js</code>.</div>
+  </section>
+
+  <footer class="foot">
+    <span class="formula">Calculadora de Dano por Ataque Necessário baseada na fórmula do Desmos (preencher manualmente)</span>
+    <a class="home-btn" href="index.html">← Voltar pras abas</a>
+  </footer>
+
+</div>
+<script src="js/topbar.js"></script>
+<script>
+  // =====================================================================
+  // CONSTANTES DA FÓRMULA — vêm do seu Desmos / Google Doc, ainda não temos
+  // os valores reais. Preencha aqui depois de extraí-los.
+  // Fórmula genérica usada como placeholder:
+  //   DPA_necessario = COOLDOWN_ALVO_DO_BOSS / segundos_de_fase_alvo
+  // =====================================================================
+  const COOLDOWN_TARGET = { '1-3': 420, '3-9': 600 }; // segundos — AJUSTAR conforme Desmos
+
+  function recommendSlots(){
+    // TODO: preencher com a tabela real de pedras x porcentagem-alvo do Google Doc.
+    return { insc:'—', grav:'—', dec1:'—', dec2:'—' };
+  }
+
+  function calc(){
+    const curMin=parseInt(document.getElementById('curMin').value)||0;
+    const curSec=parseInt(document.getElementById('curSec').value)||0;
+    const curSecsTotal = curMin*60+curSec;
+    const faixa = document.querySelector('input[name="faixa"]:checked').value;
+    const hasBota = document.getElementById('hasBota').checked;
+    const hasOrb = document.getElementById('hasOrb').checked;
+
+    const expAtk = parseFloat(document.getElementById('expAtk').value)||0;
+    const feiAtk = parseFloat(document.getElementById('feiAtk').value)||0;
+
+    const target = COOLDOWN_TARGET[faixa];
+    const dpaNeeded = curSecsTotal>0 ? (target/curSecsTotal).toFixed(2) : '—';
+
+    document.getElementById('dpaNeeded').textContent =
+      `Pra fazer as fases ${faixa} de forma confortável, sua referência de dano por ataque deveria ser cerca de ${dpaNeeded}× o que você tem hoje (estimativa — ajustar com a fórmula real do Desmos).`;
+
+    const tips=[];
+    if(!hasBota) tips.push('Você ainda não tem a Bota nível 15 — ela ajuda diretamente na Velocidade de Movimento, o que reduz tempo morto entre alvos.');
+    if(!hasOrb) tips.push('Sem o Orb de Gelo nível 15 — ele costuma ser uma das maiores fontes de Redução de Recarga/Dano de Raio pro Feiticeiro.');
+    if(expAtk===0) tips.push('Preencha o dano por ataque atual da Exploradora pra eu calcular o quanto falta.');
+    if(feiAtk===0) tips.push('Preencha o dano por ataque atual do Feiticeiro pra eu calcular o quanto falta.');
+    if(!tips.length) tips.push('Seus números estão preenchidos — compare o "Dano por ataque necessário" acima com o que você tem hoje pra decidir onde investir (acessórios, pedras ou itens do mercado abaixo).');
+
+    document.getElementById('verdictText').innerHTML = tips.map(t=>`• ${t}`).join('<br>');
+
+    const slots=recommendSlots();
+    document.getElementById('slotInsc').textContent=slots.insc;
+    document.getElementById('slotGrav').textContent=slots.grav;
+    document.getElementById('slotDec1').textContent=slots.dec1;
+    document.getElementById('slotDec2').textContent=slots.dec2;
+  }
+
+  document.querySelectorAll('input').forEach(el=>el.addEventListener('input',calc));
+  document.querySelectorAll('input[name="faixa"]').forEach(el=>el.addEventListener('change',calc));
+  calc();
+
+  // ----- distribuição de orçamento (placeholder) -----
+  // Lista de exemplo de itens-alvo; troque pelos itens reais do mercado TBH e
+  // ligue os preços ao proxy da Steam (mesma lógica de mercado.html).
+  const MARKET_TARGETS = [
+    { name:'Pedra de Velocidade Lv3', char:'Exploradora', attr:'Velocidade de Movimento', price:6.5 },
+    { name:'Pedra de Raio Lv2',       char:'Feiticeiro',   attr:'Dano de Raio',            price:4.2 },
+    { name:'Pedra de Recarga Lv2',    char:'Feiticeiro',   attr:'Redução de Recarga',      price:8.9 },
+    { name:'Pedra de Projétil Lv3',   char:'Exploradora', attr:'Dano por Projétil',        price:5.3 },
+    { name:'Pedra de Área Lv1',       char:'Feiticeiro',   attr:'Dano em Área',            price:2.1 },
+  ];
+
+  document.getElementById('distributeBtn').addEventListener('click',()=>{
+    const cap = parseFloat(document.getElementById('budgetCap').value)||0;
+    const sorted = [...MARKET_TARGETS].sort((a,b)=>a.price-b.price);
+    let spent=0; const chosen=[];
+    for(const it of sorted){ if(spent+it.price<=cap){ chosen.push(it); spent+=it.price; } }
+    const tbody=document.getElementById('budgetBody');
+    const money=v=>v.toLocaleString('pt-BR',{style:'currency',currency:'BRL'});
+    tbody.innerHTML = chosen.length
+      ? chosen.map(it=>`<tr><td>${it.name}</td><td>${it.char}</td><td>${it.attr}</td><td>${money(it.price)}</td></tr>`).join('') +
+        `<tr><td colspan="3" style="text-align:right;color:var(--muted2)">Total gasto</td><td style="color:var(--green)">${money(spent)}</td></tr>`
+      : `<tr><td colspan="4">Teto baixo demais pra qualquer item de exemplo.</td></tr>`;
+    document.getElementById('budgetTable').style.display='table';
+  });
+</script>
+</body>
+</html>
